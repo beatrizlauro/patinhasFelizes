@@ -1,8 +1,11 @@
-# model.py
+# Camada Model: responsável pela persistência (SQLite).
+
 import sqlite3
 
+DB_PATH = 'petshop.db'
+
 def conectar():
-    return sqlite3.connect('petshop.db')
+    return sqlite3.connect(DB_PATH)
 
 def criar_tabela():
     conn = conectar()
@@ -10,7 +13,7 @@ def criar_tabela():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS pets (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome_pet TEXT NOT NULL,
+            nome TEXT NOT NULL,
             especie TEXT NOT NULL,
             tutor TEXT NOT NULL
         )
@@ -18,53 +21,51 @@ def criar_tabela():
     conn.commit()
     conn.close()
 
-def adicionar_animal(nome_pet, especie, tutor):
+def adicionar_pet(nome, especie, tutor):
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO animais (nome_pet, especie, tutor) VALUES (?, ?, ?)', (nome_pet, especie, tutor))
+    cursor.execute(
+        'INSERT INTO pets (nome, especie, tutor) VALUES (?, ?, ?)',
+        (nome, especie, tutor)
+    )
     conn.commit()
     conn.close()
 
-def listar_animais():
+def listar_pets():
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM animais')
-    animais = cursor.fetchall()
+    cursor.execute('SELECT id, nome, especie, tutor FROM pets')
+    rows = cursor.fetchall()
     conn.close()
-    return animais
+    return [
+        {'id': r[0], 'nome': r[1], 'especie': r[2], 'tutor': r[3]}
+        for r in rows
+    ]
 
-def buscar_animal_por_nome(nome_pet):
+def buscar_pet_por_nome(nome):
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM animais WHERE nome = ?', (nome_pet,))
-    resultado = cursor.fetchall()
+    cursor.execute('SELECT id, nome, especie, tutor FROM pets WHERE nome = ?', (nome,))
+    rows = cursor.fetchall()
     conn.close()
-    return resultado
+    return [
+        {'id': r[0], 'nome': r[1], 'especie': r[2], 'tutor': r[3]}
+        for r in rows
+    ]
 
-def atualizar_animal(id, nome_pet, especie, tutor):
+def atualizar_pet(pet_id, nome, especie, tutor):
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute('UPDATE animais SET nome_pet = ?, especie = ?, tutor = ? WHERE id = ?', (nome_pet, especie, tutor, id))
+    cursor.execute(
+        'UPDATE pets SET nome = ?, especie = ?, tutor = ? WHERE id = ?',
+        (nome, especie, tutor, pet_id)
+    )
     conn.commit()
     conn.close()
 
-def deletar_animal(id):
+def deletar_pet(pet_id):
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute('DELETE FROM animais WHERE id = ?', (id,))
+    cursor.execute('DELETE FROM pets WHERE id = ?', (pet_id,))
     conn.commit()
     conn.close()
-
-# test_model.py
-from .model import *
-
-criar_tabela()
-adicionar_animal("Bem", "Cachorro", "Maria")
-adicionar_animal("Mingal", "Gato", "Augusto")
-
-print("Todos os animais:")
-for a in listar_animais():
-    print(a)
-
-print("Busca por nome:")
-print(buscar_animal_por_nome("Bem"))
