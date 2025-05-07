@@ -46,7 +46,7 @@ petshop/            # pasta raiz do projeto
 1. **Clonar o repositório**
 
    ```bash
-   git clone https://seu-repositorio.git
+   git clone https://github.com/beatrizlauro/patinhasFelizes.git
    cd petshop
    ```
 2. **Instalar dependências**
